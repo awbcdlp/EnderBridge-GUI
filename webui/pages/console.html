@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EnderBridge - 控制台</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<script>document.documentElement.setAttribute('data-theme',localStorage.getItem('enderbridge_theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'));</script>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <span class="logo">⛏️</span>
+    <div>
+      <div class="name" id="srvName">EnderBridge</div>
+      <div class="ver">Web 管理</div>
+    </div>
+  </div>
+  <div class="nav-item" data-page="dashboard"><span>📊</span><span>仪表盘</span></div>
+  <div class="nav-item" data-page="permissions"><span>👥</span><span>权限管理</span></div>
+  <div class="nav-item" data-page="config"><span>⚙️</span><span>功能设置</span></div>
+  <div class="nav-item" data-page="mods"><span>🧩</span><span>Mod 管理</span></div>
+  <div class="nav-item" data-page="console"><span>💻</span><span>控制台</span></div>
+  <div class="nav-item" data-page="audit"><span>📋</span><span>审计日志</span></div>
+  <div class="nav-item" data-page="update"><span>🔄</span><span>检查更新</span></div>
+  <div class="spacer"></div>
+  <button class="theme-toggle" id="themeToggle"><span class="theme-icon">🌙</span><span class="theme-label">深色模式</span></button>
+  <div class="guest-badge" id="guestBadge">👤 访客模式</div>
+  <div class="nav-item hidden" id="adminLoginBtn"><span>🔑</span><span>管理员登录</span></div>
+  <div class="logout" id="logoutBtn"><span>🚪</span><span>退出登录</span></div>
+</aside>
+<div class="main">
+  <h2>💻 控制台</h2>
+
+  <div class="card" id="consoleCmdCard">
+    <div style="font-weight:600;margin-bottom:8px;">发送命令</div>
+    <p class="desc" style="margin-bottom:8px;">直接向 MCBE 服务器发送命令。以 <code>/</code> 开头为游戏命令(如 <code>/list</code>)，否则作为聊天消息发送。</p>
+    <div class="row gap-10" style="align-items:stretch">
+      <input type="text" id="consoleInput" placeholder="输入命令，如 /list 或 say hello" style="flex:1;padding:8px 12px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-family:monospace;font-size:14px;" autocomplete="off" />
+      <button class="btn btn-primary btn-sm" id="consoleExecBtn">▶ 执行</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div style="font-weight:600;margin-bottom:8px;">命令输出</div>
+    <div id="consoleOutput" style="background:#0f172a;border:1px solid #1e293b;border-radius:6px;padding:12px;min-height:200px;max-height:500px;overflow-y:auto;font-family:monospace;font-size:13px;color:#94a3b8;white-space:pre-wrap;word-break:break-all;"></div>
+    <div style="margin-top:8px;">
+      <button class="btn btn-sm" id="consoleClearBtn">🗑️ 清空</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/console.js"></script>
+</body>
+</html>

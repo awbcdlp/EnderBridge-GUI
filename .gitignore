@@ -1,0 +1,27 @@
+mod/__pycache__/
+lib/__pycache__/
+__pycache__/
+.pytest_cache/
+.venv./
+.idea/
+logs/*
+permission.json
+permission.json.bak
+config.json
+config.json.bak
+config.py
+config.py.bak
+# 资源目录: 忽略用户内容,保留目录结构(.gitkeep 占位)
+resources/midi/*
+resources/mcfunc/*
+resources/ezmatic/*
+resources/pictures/*
+structures/*
+!.gitkeep
+wiki/
+importtime.log
+mod/bot/node_modules/
+mod/bot/.minecraft/
+mod/bot/TheCandyBot/
+logs/
+CHANGELOG.md

@@ -1,0 +1,3 @@
+# EnderBridge 桌面启动器 (GUI) 额外依赖
+# 原项目 requirements.txt 中的运行时依赖仍会被 launcher 自动检测并安装。
+PySide6-Essentials>=6.6

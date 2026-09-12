@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EnderBridge Web 管理</title>
+<link rel="stylesheet" href="/static/css/style.css">
+
+</head>
+<body>
+
+<!-- 登录页 -->
+<div id="loginView">
+  <div class="login-card">
+    <div class="logo">⛏️</div>
+    <h1>EnderBridge Web 管理</h1>
+    <p class="sub">请输入管理令牌以继续</p>
+    <label for="tokenInput">管理令牌</label>
+    <input id="tokenInput" type="password" placeholder="请输入令牌" autocomplete="off">
+    <button id="loginBtn" type="button">登 录</button>
+    <button id="guestBtn" type="button" class="guest-btn">以访客身份浏览 (Guest)</button>
+    <div class="login-msg" id="loginMsg"></div>
+    <div class="login-hint">令牌在 config.json 的 webuiConfig.token 中设置。<br>令牌正确:开放全部管理权限;令牌错误:提示密码错误;或点击下方按钮以访客身份浏览(仅仪表盘 / Mod 列表)。</div>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div id="appView">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="logo">⛏️</span>
+      <div>
+        <div class="name" id="srvName">EnderBridge</div>
+        <div class="ver" id="srvVer">Web 管理</div>
+        <div class="try-modloader">Also try ModLoader!</div>
+      </div>
+    </div>
+    <div class="nav-item active" data-page="dashboard"><span>📊</span><span>仪表盘</span></div>
+    <div class="nav-item" data-page="permissions"><span>👥</span><span>权限管理</span></div>
+    <div class="nav-item" data-page="config"><span>⚙️</span><span>功能设置</span></div>
+    <div class="nav-item" data-page="mods"><span>🧩</span><span>Mod 管理</span></div>
+    <div class="nav-item" data-page="update"><span>🔄</span><span>检查更新</span></div>
+    <div class="spacer"></div>
+    <div class="guest-badge" id="guestBadge">👤 访客模式</div>
+    <div class="nav-item hidden" id="adminLoginBtn"><span>🔑</span><span>管理员登录</span></div>
+    <div class="logout" id="logoutBtn"><span>🚪</span><span>退出登录</span></div>
+  </aside>
+
+  <div class="main">
+    <!-- 仪表盘 -->
+    <div class="page active" id="page-dashboard">
+      <h2>📊 仪表盘</h2>
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="card card-gap">
+        <h3>🔄 服务器控制</h3>
+        <div class="row gap-10">
+          <button class="btn btn-danger" id="restartBtn">♻️ 一键重启服务器</button>
+        </div>
+        <p class="hint">优雅关闭后自动以相同参数重启进程;重启期间本页面将暂时无法访问,服务器恢复后自动刷新。</p>
+      </div>
+      <div class="card card-gap">
+        <h3>ℹ️ 说明</h3>
+        <p class="desc">
+          此页面用于在浏览器中管理 EnderBridge 服务器。<br>
+          · <b>权限管理</b>：增删 owner / op / user / blocker 玩家列表<br>
+          · <b>功能设置</b>：开关 QQ 桥接、音乐打击乐、限流等,以及 Web 端口与令牌<br>
+          · <b>Mod 管理</b>：查看客户端/服务端 Mod 加载配置,一键重载服务端 Mod<br>
+          <span class="muted">注意:功能设置的修改需重启服务器后完全生效。</span>
+        </p>
+      </div>
+      <div class="card card-gap" id="releaseNotesCard" style="display:none;">
+        <h3>📝 Release Notes <span id="releaseTag" class="td-dim"></span></h3>
+        <div id="releaseBody" class="release-body"></div>
+        <a id="releaseLink" href="#" target="_blank" class="release-link" style="display:none;">在 GitHub 上查看 →</a>
+      </div>
+    </div>
+
+    <!-- 权限管理 -->
+    <div class="page" id="page-permissions">
+      <h2>👥 权限管理</h2>
+      <div class="card">
+        <h3>👑 服主 (owner)</h3>
+        <p class="hint">拥有全部权限。</p>
+        <input class="owner-input" id="perm-owner" placeholder="YourXboxName">
+      </div>
+      <div class="card perm-group">
+        <div class="ghead"><h3>🛡️ 管理员 (op)</h3><span class="badge">op</span><span class="count" id="count-op">0 人</span></div>
+        <div class="row">
+          <input id="input-op" placeholder="输入玩家名">
+          <button class="btn btn-sm" data-group="op">添加</button>
+        </div>
+        <div class="chip-list" id="chips-op"></div>
+      </div>
+      <div class="card perm-group">
+        <div class="ghead"><h3>🙂 普通用户 (user)</h3><span class="badge">user</span><span class="count" id="count-user">0 人</span></div>
+        <div class="row">
+          <input id="input-user" placeholder="输入玩家名">
+          <button class="btn btn-sm" data-group="user">添加</button>
+        </div>
+        <div class="chip-list" id="chips-user"></div>
+      </div>
+      <div class="card perm-group">
+        <div class="ghead"><h3>🚫 屏蔽名单 (blocker)</h3><span class="badge">blocker</span><span class="count" id="count-blocker">0 人</span></div>
+        <div class="row">
+          <input id="input-blocker" placeholder="输入玩家名">
+          <button class="btn btn-sm" data-group="blocker">添加</button>
+        </div>
+        <div class="chip-list" id="chips-blocker"></div>
+      </div>
+      <div class="row gap-10">
+        <button class="btn" id="permSave">保存权限</button>
+        <button class="btn btn-ghost" id="permReload">重新加载</button>
+      </div>
+    </div>
+
+    <!-- 功能设置 -->
+    <div class="page" id="page-config">
+      <h2>⚙️ 功能设置</h2>
+      <div class="card">
+        <h3>🔧 基础设置</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>服务器名称</label><input id="cfg-name"></div>
+          <div class="form-group"><label>WebSocket 端口</label><input id="cfg-port" type="number" min="1" max="65535"></div>
+          <div class="form-group"><label>命令前缀</label><input id="cfg-prefix" maxlength="4"></div>
+          <div class="form-group"><label>日志等级</label>
+            <select id="cfg-loglevel">
+              <option value="debug">debug</option>
+              <option value="info">info</option>
+              <option value="warning">warning</option>
+              <option value="error">error</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🧩 Mod 开关</h3>
+        <h4 class="sub-h">🖥️ 客户端 Mod</h4>
+        <div class="mod-grid" id="modClientBox"></div>
+        <h4 class="sub-h">🖧 服务端 Mod</h4>
+        <div class="mod-grid" id="modServerBox"></div>
+        <p class="hint">勾选 = 启用对应 Mod;自定义 Mod 不在列表中时不受影响。修改后需重启服务器生效。</p>
+      </div>
+
+      <div class="card" id="cfgCardMusic">
+        <h3>🎵 音乐 Mod</h3>
+        <div class="switch-row">
+          <label class="switch">
+            <input id="cfg-percussion" type="checkbox">
+            <span class="track"></span>
+          </label>
+          <span class="switch-label">播放打击乐</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>💬 QQ 群消息桥接</h3>
+        <div class="switch-row">
+          <label class="switch">
+            <input id="cfg-qq" type="checkbox">
+            <span class="track"></span>
+          </label>
+          <span class="switch-label">启用 QQ群聊消息 桥接</span>
+        </div>
+        <div class="sub-box" id="qqFields">
+          <div class="form-grid">
+            <div class="form-group"><label>QQ 群号</label><input id="cfg-qqgroup" type="number"></div>
+            <div class="form-group"><label>桥接端口</label><input id="cfg-qqport" type="number" min="1" max="65535"></div>
+            <div class="form-group"><label>桥接主机</label><input id="cfg-qqhost"></div>
+            <div class="form-group"><label>访问令牌</label><input id="cfg-qqtoken" type="password" autocomplete="off"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🚦 命令限流</h3>
+        <div class="switch-row">
+          <label class="switch">
+            <input id="cfg-ratelimit" type="checkbox">
+            <span class="track"></span>
+          </label>
+          <span class="switch-label">启用命令限流</span>
+        </div>
+        <div class="sub-box" id="rlFields">
+          <div class="form-grid">
+            <div class="form-group"><label>时间窗口 (毫秒)</label><input id="cfg-rlwindow" type="number" min="1"></div>
+            <div class="form-group"><label>窗口内最大命令数</label><input id="cfg-rlmax" type="number" min="1"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="cfgCardAi">
+        <h3>🤖 AI 对话</h3>
+        <div class="form-grid">
+          <div class="form-group full"><label>API 地址 (baseURL)</label><input id="cfg-aibase" placeholder="https://api.deepseek.com"></div>
+          <div class="form-group full"><label>API Key</label><input id="cfg-aikey" type="password" placeholder="sk-..." autocomplete="off"></div>
+          <div class="form-group"><label>对话冷却 (毫秒)</label><input id="cfg-aicooldown" type="number" min="0"></div>
+        </div>
+        <h4 class="sub-h">💬 对话模式 (chat)</h4>
+        <div class="form-grid">
+          <div class="form-group"><label>模型</label><input id="cfg-aichatmodel" placeholder="deepseek-chat"></div>
+          <div class="form-group"><label>最大输出 tokens</label><input id="cfg-aichattokens" type="number" min="1"></div>
+          <div class="form-group full"><label>系统提示词 (人格设定)</label><textarea id="cfg-aichatprompt" rows="3"></textarea></div>
+        </div>
+        <h4 class="sub-h">⚡ 命令模式 (command)</h4>
+        <div class="form-grid">
+          <div class="form-group"><label>模型</label><input id="cfg-aicmdmodel" placeholder="deepseek-chat"></div>
+          <div class="form-group"><label>最大输出 tokens</label><input id="cfg-aicmdtokens" type="number" min="1"></div>
+          <div class="form-group full"><label>系统提示词 (JSON 输出约束)</label><textarea id="cfg-aicmdprompt" rows="3"></textarea></div>
+        </div>
+        <p class="hint">用于游戏内 <b>!ai chat / !ai cmd / !ai reset</b> 命令;修改后需重启服务器生效。</p>
+      </div>
+
+      <div class="card" id="cfgCardTool">
+        <h3>🧰 工具配置</h3>
+        <div class="switch-row">
+          <label class="switch">
+            <input id="cfg-tellall" type="checkbox">
+            <span class="track"></span>
+          </label>
+          <span class="switch-label">tell 转 tellAll</span>
+        </div>
+        <div class="switch-row">
+          <label class="switch">
+            <input id="cfg-polling" type="checkbox">
+            <span class="track"></span>
+          </label>
+          <span class="switch-label">启用轮询</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📡 消息通道</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>全局消息命令 (gmsg)</label><input id="cfg-gmsg"></div>
+          <div class="form-group"><label>私聊消息命令 (smsg)</label><input id="cfg-smsg"></div>
+        </div>
+        <p class="hint">游戏内 <b>!gmsg</b> / <b>!smsg</b> 消息发送命令名,修改后需重启服务器生效。</p>
+      </div>
+
+      <div class="card" id="cfgCardSpam">
+        <h3>📢 刷屏数据</h3>
+        <div class="form-grid">
+          <div class="form-group full"><label>攻击文本</label><textarea id="cfg-spamattack" rows="2" placeholder="§c[示例] 刷屏文本"></textarea></div>
+          <div class="form-group full"><label>广告文本 (每行一条)</label><textarea id="cfg-spamad" rows="4" placeholder="§u示例广告 1 §7| §bexample.com"></textarea></div>
+          <div class="form-group"><label>广告推送间隔 (毫秒)</label><input id="cfg-spaminterval" type="number" min="0"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📂 资源路径</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>音乐 (midi) 路径</label><input id="cfg-path-music"></div>
+          <div class="form-group"><label>MCFunc 路径</label><input id="cfg-path-mcfunc"></div>
+          <div class="form-group"><label>Ezmatic 路径</label><input id="cfg-path-ezmatic"></div>
+          <div class="form-group"><label>图片路径</label><input id="cfg-path-image"></div>
+        </div>
+        <p class="hint">相对项目根目录,如 <b>./resources/midi</b>;修改后需重启服务器生效。</p>
+      </div>
+
+      <div class="card">
+        <h3>🌐 Web 管理</h3>
+        <div class="switch-row">
+          <label class="switch">
+            <input id="cfg-webui" type="checkbox">
+            <span class="track"></span>
+          </label>
+          <span class="switch-label">启用 Web 管理界面</span>
+        </div>
+        <div class="sub-box" id="webuiFields">
+          <div class="form-grid">
+            <div class="form-group"><label>Web 管理端口</label><input id="cfg-webport" type="number" min="1" max="65535"></div>
+            <div class="form-group"><label>管理令牌 (留空=仅本机访问)</label><input id="cfg-webtoken" type="password" autocomplete="off"></div>
+          </div>
+          <p class="hint">修改端口或令牌后需重启服务器生效。</p>
+        </div>
+      </div>
+
+      <button class="btn" id="configSave">保存配置</button>
+    </div>
+
+    <!-- Mod 管理 -->
+    <div class="page" id="page-mods">
+      <h2>🧩 Mod 管理</h2>
+      <div class="row gap-10 mb-16">
+        <button class="btn" id="modReloadAll">🔄 重载所有服务端 Mod</button>
+        <button class="btn btn-ghost" id="modRefresh">刷新列表</button>
+      </div>
+      <div class="card">
+        <h3>🖥️ 客户端 Mod</h3>
+        <table class="mod-table">
+          <thead><tr><th>名称</th><th>模块路径</th><th>状态</th></tr></thead>
+          <tbody id="modBodyClient"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>🖧 服务端 Mod</h3>
+        <table class="mod-table">
+          <thead><tr><th>名称</th><th>模块路径</th><th>状态</th></tr></thead>
+          <tbody id="modBodyServer"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 检查更新 -->
+    <div class="page" id="page-update">
+      <h2>🔄 检查更新</h2>
+
+      <div class="card" id="updateCheckCard">
+        <h3>📡 检查最新版本</h3>
+        <p class="desc">从 GitHub 获取最新 Release 信息并与当前版本对比。</p>
+        <div class="row gap-10" style="margin-top:12px;">
+          <button class="btn" id="updateCheckBtn">🔍 检查更新</button>
+        </div>
+        <div id="updateCheckResult" style="margin-top:14px; display:none;">
+          <div class="update-current-ver">当前版本: <code id="updateCurVer"></code></div>
+          <div id="updateLatestInfo"></div>
+        </div>
+      </div>
+
+      <div class="card card-gap" id="updateLocalCard">
+        <h3>📦 本地压缩包更新</h3>
+        <p class="desc">选择本地 .zip 或 .tar.gz 压缩包进行离线更新。</p>
+        <div class="row gap-10" style="margin-top:12px;">
+          <input type="file" id="updateFileInput" accept=".zip,.tar.gz,.tgz" style="display:none;">
+          <button class="btn btn-ghost" id="updateChooseFileBtn">📁 选择文件</button>
+          <span id="updateFileName" class="td-dim"></span>
+          <button class="btn" id="updateLocalBtn" disabled>🚀 执行更新</button>
+        </div>
+        <p class="hint">更新将替换项目文件(保留 config.py 和 permission.json),服务器会自动重启。</p>
+      </div>
+
+      <div class="card card-gap">
+        <h3>📜 版本历史</h3>
+        <p class="desc">GitHub 上的所有 Release 记录。</p>
+        <div id="releasesList" style="margin-top:12px;">
+          <button class="btn btn-ghost" id="releasesLoadBtn">加载版本历史</button>
+        </div>
+        <div id="releasesPager" style="margin-top:10px; display:none;">
+          <button class="btn btn-ghost btn-sm" id="releasesPrevBtn" disabled>← 上一页</button>
+          <span id="releasesPageNum" class="td-dim" style="margin:0 8px;"></span>
+          <button class="btn btn-ghost btn-sm" id="releasesNextBtn">下一页 →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
